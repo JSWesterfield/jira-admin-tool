@@ -30,7 +30,7 @@ const password = config.get("jiraCloudCreds.password");
 // In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
 // See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
 // We rethrow the exception by default.
-console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + `, and I have a password of ${password}.`);
+// console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + `, and I have a password of ${password}.`);
 
 // client.getSecretValue({SecretId: secretName}, function(err, data) {
 //     if (err) {
@@ -82,9 +82,9 @@ console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + 
     const issueType1 = config.get("issueFields.issueType1");
     const issueType2 = config.get("issueFields.issueType2");
     const issueType3 = config.get("issueFields.issueType3");
-    const reporter = config.get("issueFields.reporterName");
-    const assignee = config.get("issueFields.assigneeName1");
-    
+    const reporterId = config.get("issueFields.reporterId");
+    const assigneeId1 = config.get("issueFields.assigneeId1");
+
     app.post("/", (req, res) => {
         res.send("starts new nodejs project");
         if (req.body.status === "success") {
@@ -93,8 +93,12 @@ console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + 
                     project: {
                         key: projectKey,
                     },
-                    reporter: reporter,
-                    assignee: assignee,
+                    reporter: {
+                        id: reporterId
+                    },
+                    assignee: {
+                        id: assigneeId1
+                    },
                     summary: "[TEST]Jira Rest API via nodejs library test via jira-connector",
                     description: "This is a task created via jira-connector",
                     issueType: {
@@ -111,8 +115,13 @@ console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + 
             console.log("status: nope");
         }   
     });
+
+
+    app.get("/", (req, res) => {
+        console.log("Welcome to JIRA app")
+        res.send("Welcome to JIRA app");
+    });
     
 // });
-
 
 app.listen(5000, () => console.log("listening on part 5000"));
