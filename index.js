@@ -23,11 +23,25 @@ var jira = new JiraClient({
 
 console.log(`2. My host name is ${host}` + `, and my username is ${userName}` + `, and I have a password of ${password}.`);
 
+const projectKey = config.get("issueFields.projectKey");
+const issueType1 = config.get("issueField.issueType1");
+const issueType2 = config.get("issueField.issueType2");
+const issueType3 = config.get("issueField.issueType3");
+
+
+
 app.get("/", (req, res) => {
     res.send("starts new nodejs project");
 
     jira.issue.createIssue({
-        fields
+        fields: {
+            project: {
+                key: projectKey,
+            },
+            summary: "Jira Rest API via nodejs library",
+            description: "This is a task created via jira-connector",
+            issueType: taskType1
+        }
     })
 });
 
