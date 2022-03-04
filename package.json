@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/JSWesterfield/jira-admin-tool/issues"
   },
-  "homepage": "https://github.com/JSWesterfield/jira-admin-tool#readme"
+  "homepage": "https://github.com/JSWesterfield/jira-admin-tool#readme",
+  "dependencies": {
+    "config": "^3.3.7",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "jira-connector": "^3.1.0"
+  }
 }
