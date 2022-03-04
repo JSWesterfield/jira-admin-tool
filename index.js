@@ -13,8 +13,7 @@ const userName = config.get("JiraCloudCreds.username");
 console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + `, and I have a password of ${password}.`);
 
 
-// AWS SECRETS MANAGEMENT
-// Use this code snippet in your app.
+// AWS SECRETS MANAGEMENT 
 // If you need more information about configurations or implementing the sample code, visit the AWS docs:
 // https://aws.amazon.com/developers/getting-started/nodejs/
 
