@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/JSWesterfield/jira-admin-tool#readme",
   "dependencies": {
+    "aws-sdk": "^2.1086.0",
     "config": "^3.3.7",
     "cors": "^2.8.5",
     "express": "^4.17.3",
