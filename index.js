@@ -40,9 +40,16 @@ app.get("/", (req, res) => {
             },
             summary: "Jira Rest API via nodejs library",
             description: "This is a task created via jira-connector",
-            issueType: taskType1
-        }
-    })
+            issueType: {
+                name: taskType1,
+            }, 
+            customfield_10014: customField1,
+        }, 
+        function(error, issue) {
+            console.log("error", error);
+            console.log("issue", issue);
+        },
+    });
 });
 
 app.listen(5000, () => console.log("listening on part 5000"));
