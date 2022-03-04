@@ -4,11 +4,33 @@ const app = express();
 const cors = require("cors");
 const JiraClient = require("jira-connector");
 
-app.use(cors());
-
+// declare vars 
 const host = config.get("jiraCloudCreds.host");
 const userName = config.get("jiraCloudCreds.username");
 const password = config.get("jiraCloudCreds.password");
+
+// set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
+app.use(cors());
+
+app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Origin', ['*']);
+    res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
+// app.use('/', (req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header(
+//         'Access-Control-Allow-Headers',
+//         'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+//     );
+//     res.header('x-slack-signature', '*');
+//     next();
+
+//   });
+
+
 
 
 // AWS SECRETS MANAGEMENT 
@@ -69,7 +91,7 @@ const password = config.get("jiraCloudCreds.password");
     // const password = secret;
     
     // Your code goes here. 
-    var jira = new JiraClient({
+    let jira = new JiraClient({
         host: host,                    // find host url
         basic_auth: {
             username: userName,     // find username(email?)
@@ -84,27 +106,31 @@ const password = config.get("jiraCloudCreds.password");
     const issueType3 = config.get("issueFields.issueType3");
     const reporterId = config.get("issueFields.reporterId");
     const assigneeId1 = config.get("issueFields.assigneeId1");
+    const priority2 = config.get("issueFields.priority2");
 
     app.post("/", (req, res) => {
         res.send("starts new nodejs project");
         if (req.body.status === "success") {
             jira.issue.createIssue({
-                fields: {
-                    project: {
-                        key: projectKey,
+                "fields": {
+                    "project": {
+                        "key": projectKey,
                     },
-                    reporter: {
-                        id: reporterId
+                    "reporter": {
+                        "id": reporterId
                     },
-                    assignee: {
-                        id: assigneeId1
+                    "assignee": {
+                        "id": assigneeId1
                     },
-                    summary: "[TEST]Jira Rest API via nodejs library test via jira-connector",
-                    description: "This is a task created via jira-connector",
-                    issueType: {
-                        name: taskType1,
-                    }, 
-                    customfield_10008: customField1,
+                    "summary": "[TEST]Jira Rest API via nodejs library test via jira-connector",
+                    "description": "This is a task created via jira-connector",
+                    "issueType": {
+                        "name": taskType1,
+                    },
+                    "priority": {
+                        "id": priority2
+                    },  
+                    "customfield_10008": customField1,
                 }, 
                 function(error, issue) {
                     console.log("error", error);
