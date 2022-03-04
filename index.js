@@ -87,29 +87,32 @@ console.log(`1. My host name is ${host}` + `, and my username is ${userName}` + 
     
     app.post("/", (req, res) => {
         res.send("starts new nodejs project");
-    
-        jira.issue.createIssue({
-            fields: {
-                project: {
-                    key: projectKey,
-                },
-                reporter: reporter,
-                assignee: assignee,
-                summary: "[TEST]Jira Rest API via nodejs library test via jira-connector",
-                description: "This is a task created via jira-connector",
-                issueType: {
-                    name: taskType1,
+        if (req.body.status === "success") {
+            jira.issue.createIssue({
+                fields: {
+                    project: {
+                        key: projectKey,
+                    },
+                    reporter: reporter,
+                    assignee: assignee,
+                    summary: "[TEST]Jira Rest API via nodejs library test via jira-connector",
+                    description: "This is a task created via jira-connector",
+                    issueType: {
+                        name: taskType1,
+                    }, 
+                    customfield_10008: customField1,
                 }, 
-                customfield_10008: customField1,
-            }, 
-            function(error, issue) {
-                console.log("error", error);
-                console.log("issue", issue);
-            },
-        });
+                function(error, issue) {
+                    console.log("error", error);
+                    console.log("issue", issue);
+                },
+            });
+        } else {
+            console.log("status: nope");
+        }   
     });
     
-});
+// });
 
 
 app.listen(5000, () => console.log("listening on part 5000"));
