@@ -1,55 +1,78 @@
-const express = require("express");
-const config = require("config");
+import express  from 'express'
+import config from 'config';
+import fetch from 'node-fetch'
+import cors from 'cors';
+import bodyParser from 'body-parser';
+
 const app = express();
-var bodyParser = require('body-parser')
-const cors = require("cors");
 
 // // declare vars 
-const host = config.get("jiraCloudCreds.host");
-const userName = config.get("jiraCloudCreds.username");
-const password = config.get("jiraCloudCreds.password");
-const projectKey = config.get("issueFields.projectKey");
-const issueType1 = config.get("issueFields.issueType1");
-const issueType2 = config.get("issueFields.issueType2");
-const issueType3 = config.get("issueFields.issueType3");
-const reporterId = config.get("issueFields.reporterId");
-const assigneeId1 = config.get("issueFields.assigneeId1");
-const customField1_Id = config.get("issueFields.customField1_Id");
-const priority2 = config.get("issueFields.priority2");
-const AuthString = [userName,':',password] //Array.prototype.join()
-console.log(`Our new AuthString is: ${AuthString}`);
+const host = config.get('jiraCloudCreds.host');
+const userName = config.get('jiraCloudCreds.username');
+const password = config.get('jiraCloudCreds.password');
+const endpoint = config.get('jiraCloudCreds.endpointBulkCreate')
+const projectKey = config.get('issueFields.projectKey');
+const issueType1 = config.get('issueFields.issueType1');
+const issueType2 = config.get('issueFields.issueType2');
+const issueType3 = config.get('issueFields.issueType3');
+const reporterId = config.get('issueFields.reporterId');
+const assigneeId1 = config.get('issueFields.assigneeId1');
+const customField1_Id = config.get('issueFields.customField1_Id');
+const priority2 = config.get('issueFields.priority2');
 
-// // set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
+const authString = `${userName}` + ':' + `${password}`; // 'email@example.com:<api_token>'
+console.log(`Our new authString is: ${authString}`); 
+
+const domain = `${host}`+`${endpoint}`;  // https://your-domain.atlassian.net/rest/api/2/issue/bulk
+console.log(`Our new domain is: ${domain}`); // test
+
+// set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
-const fetch = require('node-fetch');
-
+// bodyData for 1 issue creation
 const bodyData = `{
-  "update": {},
-  "fields": {
-    "summary": "[TEST]Report Dev tasks within JIRA ",
-    "issuetype": {
-      "name": ${issueType2}
+  'update': {},
+  'fields': {
+    'summary': '[TEST]Report Dev tasks within JIRA ',
+    'issuetype': {
+      'name': ${issueType2}
     },
-    "project": {
-      "key": ${projectKey}
+    'project': {
+      'key': ${projectKey}
     },
-    "description": "This is a task created via via nodeJS.",
-    "reporter": {
-      "id": ${reporterId}
+    'description': 'This is a task created via via nodeJS.',
+    'reporter': {
+      'id': ${reporterId}
     },
-    "assignee": {
-      "id": ${assigneeId1}
+    'assignee': {
+      'id': ${assigneeId1}
     }, 
-    "customfield_10008": ${customField1_Id}
+    'customfield_10008': ${customField1_Id}
   }
 }`;
 
-// fetch('https://your-domain.atlassian.net/rest/api/2/issue', {
+// EXAMPLE FETCH REQUEST METHOD
+// fetch(https://your-domain.atlassian.net/rest/api/2/issue, {
 //   method: 'POST',
 //   headers: {
 //     'Authorization': `Basic ${Buffer.from(
 //       'email@example.com:<api_token>'
+//     ).toString('base64')}`,
+//     'Accept': 'application/json',
+//     'Content-Type': 'application/json'
+//   },
+
+// Example: domain : 'https://your-domain.atlassian.net/rest/api/2/issue'
+// fetch(domain, {
+//   method: 'POST',
+//   headers: {
+//     'Authorization': `Basic ${Buffer.from(
+//       authString                            //  email@example.com:<api_token>'     
 //     ).toString('base64')}`,
 //     'Accept': 'application/json',
 //     'Content-Type': 'application/json'
@@ -67,22 +90,16 @@ const bodyData = `{
 
 
 
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
-// app.use(bodyParser.urlencoded({
-//     extended: true
-// }));
+// app.use('/', (req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header(
+//         'Access-Control-Allow-Headers',
+//         'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+//     );
+//     res.header('x-slack-signature', '*');
+//     next();
 
-// // app.use('/', (req, res, next) => {
-// //     res.header('Access-Control-Allow-Origin', '*');
-// //     res.header(
-// //         'Access-Control-Allow-Headers',
-// //         'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-// //     );
-// //     res.header('x-slack-signature', '*');
-// //     next();
-
-// // });
+// });
 
 
 
@@ -93,8 +110,8 @@ const bodyData = `{
 
 // // Load the AWS SDK
 // // var AWS = require('aws-sdk'),
-// //     region = "us-east-1",
-// //     secretName = "arn:aws:secretsmanager:us-east-1:053265252367:secret:Jira-Admin-Tool-Dev-yrdODP",
+// //     region = 'us-east-1',
+// //     secretName = 'arn:aws:secretsmanager:us-east-1:053265252367:secret:Jira-Admin-Tool-Dev-yrdODP',
 // //     secret,
 // //     decodedBinarySecret;
 
@@ -157,46 +174,46 @@ const bodyData = `{
 
 
     
-//     app.post("/", (req, res) => {
-//         res.send("starts new nodejs project");
-//         if (req.body.status === "success") {
+//     app.post('/', (req, res) => {
+//         res.send('starts new nodejs project');
+//         if (req.body.status === 'success') {
 //             jira.issue.createIssue({
-//                 "fields": {
-//                     "project": {
-//                         "key": projectKey,
+//                 'fields': {
+//                     'project': {
+//                         'key': projectKey,
 //                     },
-//                     "reporter": {
-//                         "id": reporterId
+//                     'reporter': {
+//                         'id': reporterId
 //                     },
-//                     "assignee": {
-//                         "id": assigneeId1
+//                     'assignee': {
+//                         'id': assigneeId1
 //                     },
-//                     "summary": "[TEST]Jira Rest API via nodejs library test via jira-connector",
-//                     "description": "This is a task created via jira-connector",
-//                     "issueType": {
-//                         "name": taskType1,
+//                     'summary': '[TEST]Jira Rest API via nodejs library test via jira-connector',
+//                     'description': 'This is a task created via jira-connector',
+//                     'issueType': {
+//                         'name': taskType1,
 //                     },
-//                     "priority": {
-//                         "name": priority2
+//                     'priority': {
+//                         'name': priority2
 //                     },  
-//                     "customfield_10008": customField1,
+//                     'customfield_10008': customField1,
 //                 }, 
 //                 function(error, issue) {
-//                     console.log("error", error);
-//                     console.log("issue", issue);
+//                     console.log('error', error);
+//                     console.log('issue', issue);
 //                 },
 //             });
 //         } else {
-//             console.log("status: nope");
+//             console.log('status: nope');
 //         }   
 //     });
 
 
-//     app.get("/", (req, res) => {
-//         console.log("Welcome to JIRA app")
-//         res.send("Welcome to JIRA app");
+//     app.get('/', (req, res) => {
+//         console.log('Welcome to JIRA app')
+//         res.send('Welcome to JIRA app');
 //     });
     
 // // });
 
-// app.listen(5000, () => console.log("listening on part 5000"));
+// app.listen(5000, () => console.log('listening on part 5000'));

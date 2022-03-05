@@ -1,12 +1,17 @@
 // This code sample uses the 'node-fetch' library:
 // https://www.npmjs.com/package/node-fetch
-const fetch = require('node-fetch');
-const express = require('express');
-const config = require('config');
-const app = express();
-var bodyParser = require('body-parser')
-const cors = require('cors');
+import fetch from 'node-fetch'
+import express  from 'express'
+import config from 'config';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 
+const app = express();
+
+// set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
+app.use(cors());
+
+// bodyData for BULK issue creation
 const bodyData = `{
   'issueUpdates': [
     {
@@ -76,24 +81,22 @@ let endpoint = 'endpoint_bulk'
 let url = host + endpoint
 console.log(`Our domain for fetching is: ${url}`);
 
-
-
-// fetch('https://your-domain.atlassian.net/rest/api/2/issue/bulk', {
-//   method: 'POST',
-//   headers: {
-//     'Authorization': `Basic ${Buffer.from(
-//       'email@example.com:<api_token>'
-//     ).toString('base64')}`,
-//     'Accept': 'application/json',
-//     'Content-Type': 'application/json'
-//   },
-//   body: bodyData
-// })
-//   .then(response => {
-//     console.log(
-//       `Response: ${response.status} ${response.statusText}`
-//     );
-//     return response.text();
-//   })
-//   .then(text => console.log(text))
-//   .catch(err => console.error(err));
+fetch('https://your-domain.atlassian.net/rest/api/2/issue/bulk', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Basic ${Buffer.from(
+      'email@example.com:<api_token>'
+    ).toString('base64')}`,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: bodyData
+})
+  .then(response => {
+    console.log(
+      `Response: ${response.status} ${response.statusText}`
+    );
+    return response.text();
+  })
+  .then(text => console.log(text))
+  .catch(err => console.error(err));
