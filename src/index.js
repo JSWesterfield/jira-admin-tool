@@ -68,50 +68,37 @@ const bodyData = `{
 //   },
 
 // Example: domain : 'https://your-domain.atlassian.net/rest/api/2/issue'
-// fetch(domain, {
-//   method: 'POST',
-//   headers: {
-//     'Authorization': `Basic ${Buffer.from(
-//       authString                            //  email@example.com:<api_token>'     
-//     ).toString('base64')}`,
-//     'Accept': 'application/json',
-//     'Content-Type': 'application/json'
-//   },
-//   body: bodyData
-// })
-//   .then(response => {
-//     console.log(
-//       `Response: ${response.status} ${response.statusText}`
-//     );
-//     return response.text();
-//   })
-//   .then(text => console.log(text))
-//   .catch(err => console.error(err));
-
-
-
-// app.use('/', (req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', '*');
-//     res.header(
-//         'Access-Control-Allow-Headers',
-//         'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-//     );
-//     res.header('x-slack-signature', '*');
-//     next();
-
-// });
-
-
-
+fetch(domain, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Basic ${Buffer.from(
+      authString                            //  email@example.com:<api_token>'     
+    ).toString('base64')}`,
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: bodyData
+})
+  .then(response => {
+    console.log(
+      `Response: ${response.status} ${response.statusText}`
+    );
+    return response.text();
+  })
+  .then(text => console.log(text))
+  .catch(err => console.error(err));
 
 // // AWS SECRETS MANAGEMENT 
 // // If you need more information about configurations or implementing the sample code, visit the AWS docs:
 // // https://aws.amazon.com/developers/getting-started/nodejs/
 
+// const secretName = config.get('AWSCreds.secretName');
+// const region = config.get('AWSCreds.region')
+
 // // Load the AWS SDK
 // // var AWS = require('aws-sdk'),
-// //     region = 'us-east-1',
-// //     secretName = 'arn:aws:secretsmanager:us-east-1:053265252367:secret:Jira-Admin-Tool-Dev-yrdODP',
+// //     region = region,
+// //     secretName = secretName,
 // //     secret,
 // //     decodedBinarySecret;
 
@@ -172,8 +159,6 @@ const bodyData = `{
 //     });
         
 
-
-    
 //     app.post('/', (req, res) => {
 //         res.send('starts new nodejs project');
 //         if (req.body.status === 'success') {
@@ -216,4 +201,4 @@ const bodyData = `{
     
 // // });
 
-// app.listen(5000, () => console.log('listening on part 5000'));
+app.listen(5000, () => console.log('listening on part 5000'));
