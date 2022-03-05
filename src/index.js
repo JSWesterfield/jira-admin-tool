@@ -32,12 +32,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-// projectKey 
-// reporterId
-// assigneeId1
-// issueType1
-// priority2
-
+// Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
 let bodyDataDomain = {
   "fields": {
     "project": {
@@ -61,7 +56,7 @@ let bodyDataDomain = {
   }
 };
 
-// bodyData for 1 issue creation
+// stringify the JSON data and the template literal substitution(expression) values so that the fetch command will be able to parse the JSON data.
 let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
 console.log(bodyData);
 
