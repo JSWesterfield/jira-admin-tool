@@ -8,7 +8,7 @@ import bodyParser from "body-parser";
 
 const app = express();
 
-const csvResults = [];
+const newIssueCreateArr = [];
 
 const host = config.get("jiraCloudCreds.host");
 const userName = config.get("jiraCloudCreds.username");
@@ -35,6 +35,69 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+  // file system function for grabbing csv data
+  fs.createReadStream('../issues.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        console.log(row); //works!
+        newIssueCreateArr.push(row); // push csv data into newIssueCreateArr array
+  
+      })
+      .on('end', () => { 
+        var i;
+  
+        // create a issue object, that we set the values of the properties within the Issue object
+        function issue(IssueType,Description,Summary,Assignee,Reporter,Priority,Status,Issueid,Issueid,Parentid,EpicLink  ) {
+          let issueProfile = {}
+          this.issueProfile = issueProfile;
+        }
+        
+        let newIssueArray = [];
+        for (var i = 0; i < newIssueCreateArr.length; i++ ) {      
+          
+          //let workspaceName;
+          // let userEmail; 
+  
+          workspaceName = newIssueCreateArr[i].workspace_name;
+          userEmail = newIssueCreateArr[i].email;
+          // var convertedWSTeamID = WStoTeamID.getUserTeamId(workspaceName);
+          // var convertedTs = getLocalToTimeStampFormat(newIssueCreateArr[i].expiry_date);
+  
+          // POST TIME STAMP CONVERSION, set the profile to values
+          // newUser.issueProfile.token = token;                        // userToken in devops.json
+          newUser.issueProfile.issueType = IssueType;
+          newUser.issueProfile.description = newIssueCreateArr[i].Description;           // guest email
+          newUser.issueProfile.summary = newIssueCreateArr[i].Summary
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Assignee; 
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Reporter;  
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Assignee;  
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Priority;     
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Status;  
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Issueid; 
+          newUser.issueProfile.assignee = newIssueCreateArr[i].Parentid;  
+          newUser.issueProfile.assignee = newIssueCreateArr[i].EpicLink; 
+          
+          // send off an API request to test the existence of the guest using the requested email
+          (async () => {  
+            // app.post('/admin.users.setExpiration', function (req, res) {
+            //   Respond to the message back in the same channel'
+            //   const response = await web.admin.users.setExpiration({ 
+            //     token: config.get('token'),
+            //     expiration_ts: newUser.profile.guest_expiration_ts,
+            //     user_id: newUser.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
+            //     team_id: newUser.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
+            //     limit: config.limit,
+            //     include_local: true,
+            //   });
+  
+            //   console.log('A:123 The users expiration has been updated! Have a great day!') 
+            // })();
+          });
+        }
+      })
+}
+// updateGuestExpiration(); // RUN UpdateGuestExpiration() function to update a guests expiration/expiry date
 
 // Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
 let bodyDataDomain = {
