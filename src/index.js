@@ -5,6 +5,7 @@ import config from "config";
 import fetch from "node-fetch"
 import cors from "cors";
 import bodyParser from "body-parser";
+import { reportedId, assignedId } from "./services/conversion.js"
 
 // Use https://atlassian-connect-validator.herokuapp.com/validate to validate atlassian-connect.json
 
@@ -64,7 +65,7 @@ fs.createReadStream('./testIssues.csv')
       newIssue.issueProfile.Issueid = newIssueCreateArr[i].Issueid; 
       newIssue.issueProfile.Parentid = newIssueCreateArr[i].Parentid;  
       newIssue.issueProfile.EpicLink = newIssueCreateArr[i].EpicLink; 
-      
+
       // console.log(newIssue) // test
 
       const host = config.get("jiraCloudCreds.host");
@@ -75,8 +76,8 @@ fs.createReadStream('./testIssues.csv')
 
       // THESE VARS SET AT CSV LEVEL
       // const issueType1 = config.get("issueFields.issueType1");
-      // const reporterId = config.get("issueFields.reporterId");
-      // const assigneeId1 = config.get("issueFields.assigneeId1");
+      const reporterId = config.get("issueFields.reporterId");
+      const assigneeId1 = config.get("issueFields.assigneeId1");
       // const epicName = config.get("issueFields.epicName");
       // const priority2 = config.get("issueFields.priority2");
 
@@ -87,12 +88,16 @@ fs.createReadStream('./testIssues.csv')
       //console.log(`Our new domain is: ${domain}`); // test
 
       let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
-      let reporter = newIssue.issueProfile.reporter;
-      let assignee = newIssue.issueProfile.assignee;
+      // let reporter = newIssue.issueProfile.reporter;
+      // let assignee = newIssue.issueProfile.assignee;
+      let reporter = reportedId(newIssue.issueProfile.reporter); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id
+      let assignee = assigneeId(newIssue.issueProfile.assignee); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id 
       let summary = newIssue.issueProfile.summary
       let description = newIssue.issueProfile.description
       let epicName = newIssue.issueProfile.EpicLink
       let priority = newIssue.issueProfile.priority
+
+      console.log(`Our reporter is: ${reporter} and our assignee: ${assignee}`)
 
       // Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
       let bodyDataDomain = {
@@ -101,10 +106,10 @@ fs.createReadStream('./testIssues.csv')
             "key": `${projectKey}`
           },
           "reporter": {
-            "name": `${reporter}`
+            "id": `${reporterId}`
           },
           "assignee": {
-            "name": `${assignee}`
+            "id": `${assignedId}`
           },
           "summary": `${summary}`,
           "description": `${description}`,
@@ -123,25 +128,25 @@ fs.createReadStream('./testIssues.csv')
       console.log('Row 128 ------------------------');
       console.log(bodyData);
       // Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
-      fetch(domain, {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${Buffer.from(
-            authString                            //  email@example.com:<api_token>"     
-          ).toString("base64")}`,
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: bodyData
-      })
-        .then(response => {
-          console.log(
-            `Response: ${response.status} ${response.statusText}`
-          );
-          return response.text();
-        })
-        .then(text => console.log(text))
-        .catch(err => console.error(err));
+      // fetch(domain, {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Basic ${Buffer.from(
+      //       authString                            //  email@example.com:<api_token>"     
+      //     ).toString("base64")}`,
+      //     "Accept": "application/json",
+      //     "Content-Type": "application/json"
+      //   },
+      //   body: bodyData
+      // })
+      //   .then(response => {
+      //     console.log(
+      //       `Response: ${response.status} ${response.statusText}`
+      //     );
+      //     return response.text();
+      //   })
+      //   .then(text => console.log(text))
+      //   .catch(err => console.error(err));
 
       // send off an API request to test the existence of the guest using the requested email
       // (async () => {  

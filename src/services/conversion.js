@@ -1,23 +1,43 @@
-
 import config from "config";
 
 // 1. Convert REPORTER NAME to REPORTER ID, disregard if you can create this with reporter name
-let reportId;
-if (typeof reporterId == 'null') {
-    reporterId = config.get('issueFields.reporterId');  //da
+let reportedId = function(csvReporter) { 
+    let reporterId;
+    if (typeof reporterId == 'null') {
+        reporterId = config.get('issueFields.reporterId');  //da
+        return reporterId;
+    }
+    //REFACTOR LATER TO DO GET REQUEST TO PULL BACK REPORTERID FROM REPORTER NAME
 }
-//REFACTOR LATER TO DO GET REQUEST TO PULL BACK REPORTERID FROM REPORTER NAME 
-
 
 // 2. Convert ASSIGNEE NAME to ASSIGNEE ID, disregard if you can create this with reporter name
-let assigneeId;
-if (typeof assigneeId == 'null') {
-    assigneeId = config.get('issueFields.assigneeId');  //jw
-} 
-//REFACTOR LATER TO DO GET REQUEST TO PULL BACK ASSIGNEEID FROM ASSIGNEENAME 
+let assignedId = function(csvAssignee) {
+    let assigneeId;
+    let assigneeId1 = config.get('issueFields.assigneeId1');  // jw
+    let assigneeId2 = config.get('issueFields.assigneeId2');  // tf
+    let csvAssignee = csvAssignee.toLowerCase(); 
+    if (csvAssignee == assigneeId1) {
+        assigneeId = assigneeId1; // jw
+        return assigneeId;
+    }
+    else if (csvAssignee == assigneeId2) {
+        assigneeId = assigneeId2; // tf
+        return assigneeId;
+    } 
+    else if(err) {
+        console.err(error);
+        console.log('Theres been an error');
+    } else {
+        console.log('Issue, error, who knows.')
+    }
+    // if (typeof assigneeId == 'null') {
+    //     assigneeId = config.get('issueFields.assigneeId'); //jw
+    // }
+    //REFACTOR LATER TO DO GET REQUEST TO PULL BACK ASSIGNEEID FROM ASSIGNEENAME 
+}
 
 // 3. Convert Priority Name to Priority ID, disregard if you can create this with priority name
 
-
 // EXPORT VARIABLES TO SRC/INDEX.JS
-export { reporterId, assigneeId }
+// export { reportedId, assignedId };
+export { reportedId, assigneeId };
