@@ -6,6 +6,8 @@ import fetch from "node-fetch"
 import cors from "cors";
 import bodyParser from "body-parser";
 
+// Use https://atlassian-connect-validator.herokuapp.com/validate to validate atlassian-connect.json
+
 const app = express();
 
 // set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
@@ -20,7 +22,7 @@ console.log('Row 39');
 
 const newIssueCreateArr = [];
 // file system function for grabbing csv data
-fs.createReadStream('./issues.csv')
+fs.createReadStream('./testIssues.csv')
   .pipe(csv())
   .on('data', (row) => {
     // console.log('row 44: '); // test
@@ -40,10 +42,10 @@ fs.createReadStream('./issues.csv')
     // let newIssueArray = [];
     let count = 0;
     for (var i = 0; i < newIssueCreateArr.length; i++ ) {     
-      console.log(newIssueCreateArr.length); // 11 in CSV
+      // console.log(newIssueCreateArr.length); // 11 in CSV
       let newIssue = new issue(); 
       let counter = count++;
-      // console.log(counter);
+      console.log(counter);
       //let workspaceName;
       // let userEmail; 
 
@@ -84,15 +86,13 @@ fs.createReadStream('./issues.csv')
       let domain = `${host}`+`${endpoint}`;  // https://your-domain.atlassian.net/rest/api/2/issue/bulk
       //console.log(`Our new domain is: ${domain}`); // test
 
-
       let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
       let reporter = newIssue.issueProfile.reporter;
-      let assignee = newIssue.issueProfile.reporter;
+      let assignee = newIssue.issueProfile.assignee;
       let summary = newIssue.issueProfile.summary
       let description = newIssue.issueProfile.description
       let epicName = newIssue.issueProfile.EpicLink
       let priority = newIssue.issueProfile.priority
-
 
       // Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
       let bodyDataDomain = {
@@ -122,26 +122,26 @@ fs.createReadStream('./issues.csv')
       let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
       console.log('Row 128 ------------------------');
       console.log(bodyData);
-      Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
-      // fetch(domain, {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Basic ${Buffer.from(
-      //       authString                            //  email@example.com:<api_token>"     
-      //     ).toString("base64")}`,
-      //     "Accept": "application/json",
-      //     "Content-Type": "application/json"
-      //   },
-      //   body: bodyData
-      // })
-      //   .then(response => {
-      //     console.log(
-      //       `Response: ${response.status} ${response.statusText}`
-      //     );
-      //     return response.text();
-      //   })
-      //   .then(text => console.log(text))
-      //   .catch(err => console.error(err));
+      // Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
+      fetch(domain, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(
+            authString                            //  email@example.com:<api_token>"     
+          ).toString("base64")}`,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: bodyData
+      })
+        .then(response => {
+          console.log(
+            `Response: ${response.status} ${response.statusText}`
+          );
+          return response.text();
+        })
+        .then(text => console.log(text))
+        .catch(err => console.error(err));
 
       // send off an API request to test the existence of the guest using the requested email
       // (async () => {  
@@ -161,10 +161,6 @@ fs.createReadStream('./issues.csv')
       // });
     }
   })
-
-
-
-
 
 
 // EXAMPLE FETCH REQUEST METHOD
