@@ -1,3 +1,5 @@
+const csv = require('csv-parser')
+const fs = require('fs')
 import express  from "express"
 import config from "config";
 import fetch from "node-fetch"
@@ -5,6 +7,8 @@ import cors from "cors";
 import bodyParser from "body-parser";
 
 const app = express();
+
+const csvResults = [];
 
 const host = config.get("jiraCloudCreds.host");
 const userName = config.get("jiraCloudCreds.username");
