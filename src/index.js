@@ -1,15 +1,47 @@
-import csv from "csv-parser";
+
 import fs from "fs";
 import express  from "express";
 import config from "config";
 import fetch from "node-fetch"
+import csv from "csv-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
+import winston from "winston";
+// import colorizer from "winston.format.colorize()";
+import health from "express-ping";
 import { reportedId, assignedId } from "./services/conversion.js"
 
+const app = express();
+
+// configure logger
+const logger = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.colorize({
+          all:true, 
+        }),
+        winston.format.simple(),
+        // winston.format.printf((msg) =>
+        //     colorizer.colorize(
+        //         msg.level,
+        //         `${msg.timestamp} - ${msg.level}: ${msg.message}`,
+        //     ),
+        // ),
+    ),
+    transports: [new winston.transports.Console()],
+});
 // Use https://atlassian-connect-validator.herokuapp.com/validate to validate atlassian-connect.json
 
-const app = express();
+const rawBodyBuffer = (req, res, buf, encoding) => {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
+};
+
+// INITIALIZE APP
+logger.info('Starting Jira-Bulk-Issue-Create');
+app.use(health.ping());
 
 // set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
 app.use(cors());
@@ -18,6 +50,7 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
 
 console.log('Row 39');
 
@@ -91,7 +124,7 @@ fs.createReadStream('./testIssues.csv')
       // let reporter = newIssue.issueProfile.reporter;
       // let assignee = newIssue.issueProfile.assignee;
       let reporter = reportedId(newIssue.issueProfile.reporter); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id
-      let assignee = assigneeId(newIssue.issueProfile.assignee); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id 
+      let assignee = assignedId(newIssue.issueProfile.assignee); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id 
       let summary = newIssue.issueProfile.summary
       let description = newIssue.issueProfile.description
       let epicName = newIssue.issueProfile.EpicLink
@@ -187,7 +220,7 @@ fs.createReadStream('./testIssues.csv')
 // const region = config.get("AWSCreds.region")
 
 // // Load the AWS SDK
-// // var AWS = require("aws-sdk"),
+// // import AWS from "aws-sdk",
 // //     region = region,
 // //     secretName = secretName,
 // //     secret,

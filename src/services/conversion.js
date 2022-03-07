@@ -1,4 +1,22 @@
 import config from "config";
+import winston from "winston";
+
+// configure logger
+const logger = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.simple(),
+        winston.format.printf((msg) =>
+            colorizer.colorize(
+                msg.level,
+                `${msg.timestamp} - ${msg.level}: ${msg.message}`,
+            ),
+        ),
+    ),
+    transports: [new winston.transports.Console()],
+});
+
 
 // 1. Convert REPORTER NAME to REPORTER ID, disregard if you can create this with reporter name
 let reportedId = function(csvReporter) { 
@@ -11,11 +29,11 @@ let reportedId = function(csvReporter) {
 }
 
 // 2. Convert ASSIGNEE NAME to ASSIGNEE ID, disregard if you can create this with reporter name
-let assignedId = function(csvAssignee) {
+let assignedId = function(csvAssigneed) {
     let assigneeId;
     let assigneeId1 = config.get('issueFields.assigneeId1');  // jw
     let assigneeId2 = config.get('issueFields.assigneeId2');  // tf
-    let csvAssignee = csvAssignee.toLowerCase(); 
+    let csvAssignee = csvAssigneed.toLowerCase(); 
     if (csvAssignee == assigneeId1) {
         assigneeId = assigneeId1; // jw
         return assigneeId;
@@ -39,5 +57,5 @@ let assignedId = function(csvAssignee) {
 // 3. Convert Priority Name to Priority ID, disregard if you can create this with priority name
 
 // EXPORT VARIABLES TO SRC/INDEX.JS
-// export { reportedId, assignedId };
-export { reportedId, assigneeId };
+export { reportedId, assignedId };
+// export { reportedId, assigneeId };
