@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({
 }));
 
   // file system function for grabbing csv data
-  fs.createReadStream('../issues.csv')
+  fs.createReadStream('../testIssues.csv')
       .pipe(csv())
       .on('data', (row) => {
         console.log(row); //works!
@@ -55,7 +55,7 @@ app.use(bodyParser.urlencoded({
         
         let newIssueArray = [];
         for (var i = 0; i < newIssueCreateArr.length; i++ ) {      
-          
+          let newIssue = new issue(); 
           //let workspaceName;
           // let userEmail; 
   
@@ -65,18 +65,18 @@ app.use(bodyParser.urlencoded({
           // var convertedTs = getLocalToTimeStampFormat(newIssueCreateArr[i].expiry_date);
   
           // POST TIME STAMP CONVERSION, set the profile to values
-          // newUser.issueProfile.token = token;                        // userToken in devops.json
-          newUser.issueProfile.issueType = IssueType;
-          newUser.issueProfile.description = newIssueCreateArr[i].Description;           // guest email
-          newUser.issueProfile.summary = newIssueCreateArr[i].Summary
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Assignee; 
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Reporter;  
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Assignee;  
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Priority;     
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Status;  
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Issueid; 
-          newUser.issueProfile.assignee = newIssueCreateArr[i].Parentid;  
-          newUser.issueProfile.assignee = newIssueCreateArr[i].EpicLink; 
+          // newIssue.issueProfile.token = token;                        // userToken in devops.json
+          newIssue.issueProfile.issueType = IssueType;
+          newIssue.issueProfile.description = newIssueCreateArr[i].Description;           // guest email
+          newIssue.issueProfile.summary = newIssueCreateArr[i].Summary
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Assignee; 
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Reporter;  
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Assignee;  
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Priority;     
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Status;  
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Issueid; 
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].Parentid;  
+          newIssue.issueProfile.assignee = newIssueCreateArr[i].EpicLink; 
           
           // send off an API request to test the existence of the guest using the requested email
           (async () => {  
@@ -84,9 +84,9 @@ app.use(bodyParser.urlencoded({
             //   Respond to the message back in the same channel'
             //   const response = await web.admin.users.setExpiration({ 
             //     token: config.get('token'),
-            //     expiration_ts: newUser.profile.guest_expiration_ts,
-            //     user_id: newUser.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
-            //     team_id: newUser.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
+            //     expiration_ts: newIssue.profile.guest_expiration_ts,
+            //     user_id: newIssue.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
+            //     team_id: newIssue.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
             //     limit: config.limit,
             //     include_local: true,
             //   });
