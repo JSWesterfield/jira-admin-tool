@@ -1,6 +1,6 @@
-const csv = require('csv-parser')
-const fs = require('fs')
-import express  from "express"
+import csv from "csv-parser";
+import fs from "fs";
+import express  from "express";
 import config from "config";
 import fetch from "node-fetch"
 import cors from "cors";
@@ -8,18 +8,18 @@ import bodyParser from "body-parser";
 
 const app = express();
 
-const newIssueCreateArr = [];
-
 const host = config.get("jiraCloudCreds.host");
 const userName = config.get("jiraCloudCreds.username");
 const password = config.get("jiraCloudCreds.password");
 const endpoint = config.get("jiraCloudCreds.endpointCreate")
 const projectKey = config.get("issueFields.projectKey");
-const issueType1 = config.get("issueFields.issueType1");
-const reporterId = config.get("issueFields.reporterId");
-const assigneeId1 = config.get("issueFields.assigneeId1");
-const epicName = config.get("issueFields.epicName");
-const priority2 = config.get("issueFields.priority2");
+
+// THESE VARS SET AT CSV LEVEL
+// const issueType1 = config.get("issueFields.issueType1");
+// const reporterId = config.get("issueFields.reporterId");
+// const assigneeId1 = config.get("issueFields.assigneeId1");
+// const epicName = config.get("issueFields.epicName");
+// const priority2 = config.get("issueFields.priority2");
 
 const authString = `${userName}` + ":" + `${password}`; // "email@example.com:<api_token>"
 console.log(`Our new authString is: ${authString}`); 
@@ -36,117 +36,129 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-  // file system function for grabbing csv data
-  fs.createReadStream('../testIssues.csv')
-      .pipe(csv())
-      .on('data', (row) => {
-        console.log(row); //works!
-        newIssueCreateArr.push(row); // push csv data into newIssueCreateArr array
-  
-      })
-      .on('end', () => { 
-        var i;
-  
-        // create a issue object, that we set the values of the properties within the Issue object
-        function issue(IssueType,Description,Summary,Assignee,Reporter,Priority,Status,Issueid,Issueid,Parentid,EpicLink  ) {
-          let issueProfile = {}
-          this.issueProfile = issueProfile;
-        }
-        
-        let newIssueArray = [];
-        for (var i = 0; i < newIssueCreateArr.length; i++ ) {      
-          let newIssue = new issue(); 
-          //let workspaceName;
-          // let userEmail; 
-  
-          workspaceName = newIssueCreateArr[i].workspace_name;
-          userEmail = newIssueCreateArr[i].email;
-          // var convertedWSTeamID = WStoTeamID.getUserTeamId(workspaceName);
-          // var convertedTs = getLocalToTimeStampFormat(newIssueCreateArr[i].expiry_date);
-  
-          // POST TIME STAMP CONVERSION, set the profile to values
-          // newIssue.issueProfile.token = token;                        // userToken in devops.json
-          newIssue.issueProfile.issueType = IssueType;
-          newIssue.issueProfile.description = newIssueCreateArr[i].Description;           // guest email
-          newIssue.issueProfile.summary = newIssueCreateArr[i].Summary
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Assignee; 
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Reporter;  
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Assignee;  
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Priority;     
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Status;  
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Issueid; 
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].Parentid;  
-          newIssue.issueProfile.assignee = newIssueCreateArr[i].EpicLink; 
-          
-          // send off an API request to test the existence of the guest using the requested email
-          (async () => {  
-            // app.post('/admin.users.setExpiration', function (req, res) {
-            //   Respond to the message back in the same channel'
-            //   const response = await web.admin.users.setExpiration({ 
-            //     token: config.get('token'),
-            //     expiration_ts: newIssue.profile.guest_expiration_ts,
-            //     user_id: newIssue.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
-            //     team_id: newIssue.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
-            //     limit: config.limit,
-            //     include_local: true,
-            //   });
-  
-            //   console.log('A:123 The users expiration has been updated! Have a great day!') 
-            // })();
-          });
-        }
-      })
-}
-// updateGuestExpiration(); // RUN UpdateGuestExpiration() function to update a guests expiration/expiry date
+console.log('Row 39');
 
-// Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
-let bodyDataDomain = {
-  "fields": {
-    "project": {
-      "key": `${projectKey}`
-    },
-    "reporter": {
-      "id": `${reporterId}`
-    },
-    "assignee": {
-      "id": `${assigneeId1}`
-    },
-    "summary": "[TEST]Estimate Scope of Project ",
-    "description": "This is a task created via via nodeJS.",
-    "issuetype": {
-      "name": `${issueType1}`
-    },
-    "priority": {
-      "name": `${priority2}`
-    }, 
-    "customfield_10008": `${epicName}`
-  }
-};
+const newIssueCreateArr = [];
+// file system function for grabbing csv data
+fs.createReadStream('./issues.csv')
+  .pipe(csv())
+  .on('data', (row) => {
+    console.log('row 44: ');
+    console.log(row); //works!
+    newIssueCreateArr.push(row); // push csv data into newIssueCreateArr array
 
-// stringify the JSON data and the template literal substitution(expression) values so that the fetch command will be able to parse the JSON data.
-let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
-console.log(bodyData);
-
-// Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
-fetch(domain, {
-  method: "POST",
-  headers: {
-    "Authorization": `Basic ${Buffer.from(
-      authString                            //  email@example.com:<api_token>"     
-    ).toString("base64")}`,
-    "Accept": "application/json",
-    "Content-Type": "application/json"
-  },
-  body: bodyData
-})
-  .then(response => {
-    console.log(
-      `Response: ${response.status} ${response.statusText}`
-    );
-    return response.text();
   })
-  .then(text => console.log(text))
-  .catch(err => console.error(err));
+  .on('end', () => { 
+    var i;
+
+    // create a issue object, that we set the values of the properties within the Issue object
+    function issue(IssueType,Description,Summary,Assignee,Reporter,Priority,Status,Issueid,Parentid,EpicLink) {
+      let issueProfile = {}
+      this.issueProfile = issueProfile;
+    }
+    
+    let newIssueArray = [];
+    for (var i = 0; i < newIssueCreateArr.length; i++ ) {      
+      let newIssue = new issue(); 
+      //let workspaceName;
+      // let userEmail; 
+
+      // Might need this for the future with create Start and End Date
+      // var convertedTs = getLocalToTimeStampFormat(newIssueCreateArr[i].expiry_date);
+
+      // POST TIME STAMP CONVERSION, set the profile to values
+      // newIssue.issueProfile.token = token;                                         // userToken in devops.json
+      newIssue.issueProfile.issueType = newIssueCreateArr[i].IssueType;
+      newIssue.issueProfile.description = newIssueCreateArr[i].Description;          
+      newIssue.issueProfile.summary = newIssueCreateArr[i].Summary
+      newIssue.issueProfile.assignee = newIssueCreateArr[i].Assignee; 
+      newIssue.issueProfile.reporter = newIssueCreateArr[i].Reporter;  
+      newIssue.issueProfile.priority = newIssueCreateArr[i].Priority;     
+      newIssue.issueProfile.status = newIssueCreateArr[i].Status;  
+      newIssue.issueProfile.Issueid = newIssueCreateArr[i].Issueid; 
+      newIssue.issueProfile.Parentid = newIssueCreateArr[i].Parentid;  
+      newIssue.issueProfile.EpicLink = newIssueCreateArr[i].EpicLink; 
+      
+      console.log(newIssue) // test
+
+      const issueType = newIssue.issueProfile.issueType; // issueType within CSV row
+      const reporterId = newIssue.issueProfile.reporter
+      const assigneeId1 = 
+      const epicName = 
+      const priority2 = 
+
+      // Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
+      let bodyDataDomain = {
+        "fields": {
+          "project": {
+            "key": `${projectKey}`
+          },
+          "reporter": {
+            "id": `${reporterId}`
+          },
+          "assignee": {
+            "id": `${assigneeId1}`
+          },
+          "summary": "[TEST]Estimate Scope of Project ",
+          "description": "This is a task created via via nodeJS.",
+          "issuetype": {
+            "name": `${issueType1}`
+          },
+          "priority": {
+            "name": `${priority2}`
+          }, 
+          "customfield_10008": `${epicName}`
+        }
+      };
+
+      // stringify the JSON data and the template literal substitution(expression) values so that the fetch command will be able to parse the JSON data.
+      let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
+      console.log('Row 128 ------------------------');
+      console.log(bodyData);
+      Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
+      fetch(domain, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${Buffer.from(
+            authString                            //  email@example.com:<api_token>"     
+          ).toString("base64")}`,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: bodyData
+      })
+        .then(response => {
+          console.log(
+            `Response: ${response.status} ${response.statusText}`
+          );
+          return response.text();
+        })
+        .then(text => console.log(text))
+        .catch(err => console.error(err));
+
+      // send off an API request to test the existence of the guest using the requested email
+      // (async () => {  
+      //   app.post('/admin.users.setExpiration', function (req, res) {
+      //     Respond to the message back in the same channel'
+      //     const response = await web.admin.users.setExpiration({ 
+      //       token: config.get('token'),
+      //       expiration_ts: newIssue.profile.guest_expiration_ts,
+      //       user_id: newIssue.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
+      //       team_id: newIssue.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
+      //       limit: config.limit,
+      //       include_local: true,
+      //     });
+
+      //     console.log('A:123 The users expiration has been updated! Have a great day!') 
+      //   })();
+      // });
+    }
+  })
+
+
+
+
+
 
 // EXAMPLE FETCH REQUEST METHOD
 // fetch(https://your-domain.atlassian.net/rest/api/2/issue, {
