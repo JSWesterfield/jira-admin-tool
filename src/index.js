@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import express  from "express";
 import config from "config";
@@ -8,7 +7,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import winston from "winston";
 // import colorizer from "winston.format.colorize()";
-import health from "express-ping";
+// import health from "express-ping";
 import { reportedId, assignedId } from "./services/conversion.js"
 
 const app = express();
@@ -41,7 +40,7 @@ const rawBodyBuffer = (req, res, buf, encoding) => {
 
 // INITIALIZE APP
 logger.info('Starting Jira-Bulk-Issue-Create');
-app.use(health.ping());
+// app.use(health.ping());
 
 // set cors, provides a Connect/Express middleware that can be used to enable CORS with various options
 app.use(cors());
@@ -51,8 +50,6 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-
-console.log('Row 39');
 
 const newIssueCreateArr = [];
 // file system function for grabbing csv data
@@ -109,8 +106,8 @@ fs.createReadStream('./testIssues.csv')
 
       // THESE VARS SET AT CSV LEVEL
       // const issueType1 = config.get("issueFields.issueType1");
-      const reporterId = config.get("issueFields.reporterId");
-      const assigneeId1 = config.get("issueFields.assigneeId1");
+      // const reporterId = config.get("issueFields.reporterId");
+      // const assigneeId1 = config.get("issueFields.assigneeId1");
       // const epicName = config.get("issueFields.epicName");
       // const priority2 = config.get("issueFields.priority2");
 
@@ -123,8 +120,8 @@ fs.createReadStream('./testIssues.csv')
       let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
       // let reporter = newIssue.issueProfile.reporter;
       // let assignee = newIssue.issueProfile.assignee;
-      let reporter = reportedId(newIssue.issueProfile.reporter); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id
-      let assignee = assignedId(newIssue.issueProfile.assignee); // pulled from conversion.js, instead of CSV, refactor to take csv and throw in conversion.js to return back as id 
+      let reporter = reportedId(newIssue.issueProfile.reporter); // convert reporterName(email) to assigneeid(userid) in conversion.js
+      let assignee = assignedId(newIssue.issueProfile.assignee); // convert reporterName(email) to assigneeid(userid) in conversion.js
       let summary = newIssue.issueProfile.summary
       let description = newIssue.issueProfile.description
       let epicName = newIssue.issueProfile.EpicLink
@@ -139,10 +136,10 @@ fs.createReadStream('./testIssues.csv')
             "key": `${projectKey}`
           },
           "reporter": {
-            "id": `${reporterId}`
+            "id": `${reporter}`
           },
           "assignee": {
-            "id": `${assignedId}`
+            "id": `${assignee}`
           },
           "summary": `${summary}`,
           "description": `${description}`,
