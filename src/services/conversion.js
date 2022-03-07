@@ -4,7 +4,7 @@ import config from "config";
 // 1. Convert REPORTER NAME to REPORTER ID, disregard if you can create this with reporter name
 let reportId;
 if (typeof reporterId == 'null') {
-    let reporterId = config.get('issueFields.reporterId');  //da
+    reporterId = config.get('issueFields.reporterId');  //da
 }
 //REFACTOR LATER TO DO GET REQUEST TO PULL BACK REPORTERID FROM REPORTER NAME 
 
@@ -12,7 +12,7 @@ if (typeof reporterId == 'null') {
 // 2. Convert ASSIGNEE NAME to ASSIGNEE ID, disregard if you can create this with reporter name
 let assigneeId;
 if (typeof assigneeId == 'null') {
-    let assigneeId = config.get('issueFields.assigneeId');  //jw
+    assigneeId = config.get('issueFields.assigneeId');  //jw
 } 
 //REFACTOR LATER TO DO GET REQUEST TO PULL BACK ASSIGNEEID FROM ASSIGNEENAME 
 
@@ -20,3 +20,4 @@ if (typeof assigneeId == 'null') {
 
 
 // EXPORT VARIABLES TO SRC/INDEX.JS
+export { reporterId, assigneeId }
