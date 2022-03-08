@@ -51,6 +51,19 @@ app.use(bodyParser.urlencoded({
 }));
 
 
+const host = config.get("jiraCloudCreds.host");
+const userName = config.get("jiraCloudCreds.username");
+const password = config.get("jiraCloudCreds.password");
+const endpoint = config.get("jiraCloudCreds.endpointCreate")
+let projectKey = config.get("issueFields.projectKey");
+let authString = `${userName}` + ":" + `${password}`; // "email@example.com:<api_token>"
+//console.log(`Our new authString is: ${authString}`); 
+
+let domain = `${host}`+`${endpoint}`;  // https://your-domain.atlassian.net/rest/api/2/issue/bulk
+//console.log(`Our new domain is: ${domain}`); // test
+
+
+
 const newIssueCreateArr = [];
 // file system function for grabbing csv data
 fs.createReadStream('./testIssues.csv')
@@ -70,15 +83,24 @@ fs.createReadStream('./testIssues.csv')
       this.issueProfile = issueProfile;
     }
     
-    // let newIssueArray = [];
+    let newIssueArray = [];
     let count = 0;
-    for (var i = 0; i < newIssueCreateArr.length; i++ ) {     
-      // console.log(newIssueCreateArr.length); // 11 in CSV
+    for (var i = 0; i < newIssueCreateArr.length; i++ ) {   
+      
+      
+      // if (newIssueCreateArr.Issue.IssueType == "Sub-task") {
+      // Atlassian Doc: https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-createmeta-get
+      // Atlassian Doc2: https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-post
+      //  pushing to a seperate array?  
+      //  after completion of Tasks, then we will have a reference(parentid) for the sub-tasks to attach.
+      // } else if (newIssueCreateArr.Issue.IssueType == "Task") {
+      //  continue with newIssue.issueProfile creation  
+      //}
+      
+      // console.log(newIssueCreateArr); // 11 in CSV
       let newIssue = new issue(); 
       let counter = count++;
       console.log(counter);
-      //let workspaceName;
-      // let userEmail; 
 
       // Might need this for the future with create Start and End Date
       // var convertedTs = getLocalToTimeStampFormat(newIssueCreateArr[i].expiry_date);
@@ -92,17 +114,40 @@ fs.createReadStream('./testIssues.csv')
       newIssue.issueProfile.reporter = newIssueCreateArr[i].Reporter;  
       newIssue.issueProfile.priority = newIssueCreateArr[i].Priority;     
       newIssue.issueProfile.status = newIssueCreateArr[i].Status;  
-      newIssue.issueProfile.Issueid = newIssueCreateArr[i].Issueid; 
-      newIssue.issueProfile.Parentid = newIssueCreateArr[i].Parentid;  
+      
+
+      // newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid;  
+      // Set parent id according to is "Sub-task" or "Task"
+      if (newIssue.issueProfile.issueType == "Sub-task") {
+        newIssue.issueProfile.parentId = projectKey + '-' + newIssueCreateArr[i].Parentid; // if issueType == "Sub-task" | EXAMPLE: "PAT-37"
+      } else if(newIssue.issueProfile.issueType == "Task") {
+        newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid; // if issueType == "Task" set to NULL value
+      }
+
+      // newIssue.issueProfile.issueId = newIssueCreateArr[i].Issueid; 
+      // Set issue id according to is "Sub-task" or "Task"
+      if (newIssue.issueProfile.issueType == "Sub-task") {
+        newIssue.issueProfile.parentId = projectKey + '-' + newIssueCreateArr[i].Issueid; // if issueType == "Sub-task" set to NULL value
+      } else if(newIssue.issueProfile.issueType == "Task") {
+        newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid; // if issueType == "Task" | Example: "PAT-37"
+      }
+        
       newIssue.issueProfile.EpicLink = newIssueCreateArr[i].EpicLink; 
 
+      newIssueArray.push(newIssue);
+
+      // to do: check for IssueType == "Sub-task", store 
+      // do while loop 
+      // do : loop newIssueCreateArr array 
+      // while: store the newIssueCreateArr item object, 
+      //        create new key called parentid set to csv.parentid.
+      //        create new key called issueId set to csv.issueid
+      //        if (csv.parentid == newissueCreateArr.issueid)                        
+      // while: s 
+      // 
       // console.log(newIssue) // test
 
-      const host = config.get("jiraCloudCreds.host");
-      const userName = config.get("jiraCloudCreds.username");
-      const password = config.get("jiraCloudCreds.password");
-      const endpoint = config.get("jiraCloudCreds.endpointCreate")
-      let projectKey = config.get("issueFields.projectKey");
+      
 
       // THESE VARS SET AT CSV LEVEL
       // const issueType1 = config.get("issueFields.issueType1");
@@ -111,12 +156,7 @@ fs.createReadStream('./testIssues.csv')
       // const epicName = config.get("issueFields.epicName");
       // const priority2 = config.get("issueFields.priority2");
 
-      let authString = `${userName}` + ":" + `${password}`; // "email@example.com:<api_token>"
-      //console.log(`Our new authString is: ${authString}`); 
-
-      let domain = `${host}`+`${endpoint}`;  // https://your-domain.atlassian.net/rest/api/2/issue/bulk
-      //console.log(`Our new domain is: ${domain}`); // test
-
+      
       let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
       // let reporter = newIssue.issueProfile.reporter;
       // let assignee = newIssue.issueProfile.assignee;
@@ -126,77 +166,72 @@ fs.createReadStream('./testIssues.csv')
       let description = newIssue.issueProfile.description
       let epicName = newIssue.issueProfile.EpicLink
       let priority = newIssue.issueProfile.priority
+      let parentid = newIssue.issueProfile.Parentid
+      let issueid = newIssue.issueProfile.Issueid
 
-      console.log(`Our reporter is: ${reporter} and our assignee: ${assignee}`)
 
-      // Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
-      let bodyDataDomain = {
-        "fields": {
-          "project": {
-            "key": `${projectKey}`
-          },
-          "reporter": {
-            "id": `${reporter}`
-          },
-          "assignee": {
-            "id": `${assignee}`
-          },
-          "summary": `${summary}`,
-          "description": `${description}`,
-          "issuetype": {
-            "name": `${issueType}`
-          },
-          "priority": {
-            "name": `${priority}`
-          }, 
-          "customfield_10008": `${epicName}`
-        }
-      };
 
-      // stringify the JSON data and the template literal substitution(expression) values so that the fetch command will be able to parse the JSON data.
-      let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
-      console.log('Row 128 ------------------------');
-      console.log(bodyData);
-      // Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
-      // fetch(domain, {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Basic ${Buffer.from(
-      //       authString                            //  email@example.com:<api_token>"     
-      //     ).toString("base64")}`,
-      //     "Accept": "application/json",
-      //     "Content-Type": "application/json"
-      //   },
-      //   body: bodyData
-      // })
-      //   .then(response => {
-      //     console.log(
-      //       `Response: ${response.status} ${response.statusText}`
-      //     );
-      //     return response.text();
-      //   })
-      //   .then(text => console.log(text))
-      //   .catch(err => console.error(err));
-
-      // send off an API request to test the existence of the guest using the requested email
-      // (async () => {  
-      //   app.post('/admin.users.setExpiration', function (req, res) {
-      //     Respond to the message back in the same channel'
-      //     const response = await web.admin.users.setExpiration({ 
-      //       token: config.get('token'),
-      //       expiration_ts: newIssue.profile.guest_expiration_ts,
-      //       user_id: newIssue.profile.user_id, // the email of the person needed for users.info. Not for admin.users.list
-      //       team_id: newIssue.profile.teamId, // team_id needed for admin.users.list and admin.users.setExpiration
-      //       limit: config.limit,
-      //       include_local: true,
-      //     });
-
-      //     console.log('A:123 The users expiration has been updated! Have a great day!') 
-      //   })();
-      // });
     }
   })
 
+// AFTER STORING CSV IN AN ARRAY(ABOVE), RETURN THIS ARRAY, and LOOP THROUGH THIS ARRAY. 
+// Create another array that will push ONLY the Tasks, skip the sub-tasks, store tasks objects in TasksArray, then we set the values into bodyDataDomain object, execute the tasks POST request, THEN 
+// AFTER the execution of the Tasks, , store objects in subTaskArray into bodyDataDomain,we will then have reference(parentId == issueId) for the IssueType Subtasks to be executing in another POST request. 
+
+// Have to set the template literal substitution values within the JSON prior to its use within the fetch method having to parse this JSON.
+let bodyDataDomain = {
+  "fields": {
+    "project": {
+      "key": `${projectKey}`
+    },
+    "parent": {
+      "key": `${parentid}`
+    },
+    "reporter": {
+      "id": `${reporter}`
+    },
+    "assignee": {
+      "id": `${assignee}`
+    },
+    "summary": `${summary}`,
+    "description": `${description}`,
+    "issuetype": {
+      "name": `${issueType}`
+    },
+    "issueId": {
+        "id": `${issueid}`
+    },
+    "priority": {
+      "name": `${priority}`
+    }, 
+    "customfield_10008": `${epicName}`
+  }
+};
+
+// stringify the JSON data and the template literal substitution(expression) values so that the fetch command will be able to parse the JSON data.
+let bodyData = JSON.stringify(bodyDataDomain)// stringify the current json into a string? Is this what we want? To be read by the fetch method 
+console.log('Row 128 ------------------------');
+console.log(bodyData); // test, leave in
+Example: domain : "https://your-domain.atlassian.net/rest/api/2/issue"
+fetch(domain, {
+  method: "POST",
+  headers: {
+    "Authorization": `Basic ${Buffer.from(
+      authString                            //  email@example.com:<api_token>"     
+    ).toString("base64")}`,
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  body: bodyData
+})
+.then(response => {
+  console.log(
+    `Response: ${response.status} ${response.statusText}`
+  );
+  return response.text();
+})
+.then(text => console.log(text))
+.catch(err => console.error(err));
 
 // EXAMPLE FETCH REQUEST METHOD
 // fetch(https://your-domain.atlassian.net/rest/api/2/issue, {
