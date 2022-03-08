@@ -56,13 +56,12 @@ const userName = config.get("jiraCloudCreds.username");
 const password = config.get("jiraCloudCreds.password");
 const endpoint = config.get("jiraCloudCreds.endpointCreate")
 let projectKey = config.get("issueFields.projectKey");
+
 let authString = `${userName}` + ":" + `${password}`; // "email@example.com:<api_token>"
 //console.log(`Our new authString is: ${authString}`); 
 
 let domain = `${host}`+`${endpoint}`;  // https://your-domain.atlassian.net/rest/api/2/issue/bulk
 //console.log(`Our new domain is: ${domain}`); // test
-
-
 
 const newIssueCreateArr = [];
 // file system function for grabbing csv data
@@ -115,23 +114,23 @@ fs.createReadStream('./testIssues.csv')
       newIssue.issueProfile.priority = newIssueCreateArr[i].Priority;     
       newIssue.issueProfile.status = newIssueCreateArr[i].Status;  
       
-
+      // newIssue.issueProfile.issueId = newIssueCreateArr[i].Issueid; 
+      // Set issue id according to is "Sub-task" or "Task"
+      if (newIssue.issueProfile.issueType == "Sub-task") {
+        newIssue.issueProfile.issueId = projectKey + '-' + newIssueCreateArr[i].Issueid; // if issueType == "Sub-task" set to NULL value
+      } else if(newIssue.issueProfile.issueType == "Task") {
+        newIssue.issueProfile.issueId = projectKey + '-' + newIssueCreateArr[i].Issueid; // if issueType == "Task" | Example: "PAT-37"
+      }
+      
       // newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid;  
       // Set parent id according to is "Sub-task" or "Task"
       if (newIssue.issueProfile.issueType == "Sub-task") {
+        // Loop through the taskArray[] and if  taskArray.issue.parentid
         newIssue.issueProfile.parentId = projectKey + '-' + newIssueCreateArr[i].Parentid; // if issueType == "Sub-task" | EXAMPLE: "PAT-37"
       } else if(newIssue.issueProfile.issueType == "Task") {
         newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid; // if issueType == "Task" set to NULL value
       }
 
-      // newIssue.issueProfile.issueId = newIssueCreateArr[i].Issueid; 
-      // Set issue id according to is "Sub-task" or "Task"
-      if (newIssue.issueProfile.issueType == "Sub-task") {
-        newIssue.issueProfile.parentId = projectKey + '-' + newIssueCreateArr[i].Issueid; // if issueType == "Sub-task" set to NULL value
-      } else if(newIssue.issueProfile.issueType == "Task") {
-        newIssue.issueProfile.parentId = newIssueCreateArr[i].Parentid; // if issueType == "Task" | Example: "PAT-37"
-      }
-        
       newIssue.issueProfile.EpicLink = newIssueCreateArr[i].EpicLink; 
 
       newIssueArray.push(newIssue);
@@ -157,22 +156,26 @@ fs.createReadStream('./testIssues.csv')
       // const priority2 = config.get("issueFields.priority2");
 
       
-      let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
-      // let reporter = newIssue.issueProfile.reporter;
-      // let assignee = newIssue.issueProfile.assignee;
-      let reporter = reportedId(newIssue.issueProfile.reporter); // convert reporterName(email) to assigneeid(userid) in conversion.js
-      let assignee = assignedId(newIssue.issueProfile.assignee); // convert reporterName(email) to assigneeid(userid) in conversion.js
-      let summary = newIssue.issueProfile.summary
-      let description = newIssue.issueProfile.description
-      let epicName = newIssue.issueProfile.EpicLink
-      let priority = newIssue.issueProfile.priority
-      let parentid = newIssue.issueProfile.Parentid
-      let issueid = newIssue.issueProfile.Issueid
-
-
+      newIssueArray.push(newIssue);
+      return 
 
     }
+
+    return newIssueArray;
   })
+
+  // We CREATE the variables that will be stored into the bodyDataDomain object for placing into the POST request
+  let issueType = newIssue.issueProfile.issueType; // issueType within CSV row
+  // let reporter = newIssue.issueProfile.reporter;
+  // let assignee = newIssue.issueProfile.assignee;
+  let reporter = reportedId(newIssue.issueProfile.reporter); // convert reporterName(email) to assigneeid(userid) in conversion.js
+  let assignee = assignedId(newIssue.issueProfile.assignee); // convert reporterName(email) to assigneeid(userid) in conversion.js
+  let summary = newIssue.issueProfile.summary
+  let description = newIssue.issueProfile.description
+  let epicName = newIssue.issueProfile.EpicLink
+  let priority = newIssue.issueProfile.priority
+  let parentid = newIssue.issueProfile.Parentid
+  let issueid = newIssue.issueProfile.Issueid
 
 // AFTER STORING CSV IN AN ARRAY(ABOVE), RETURN THIS ARRAY, and LOOP THROUGH THIS ARRAY. 
 // Create another array that will push ONLY the Tasks, skip the sub-tasks, store tasks objects in TasksArray, then we set the values into bodyDataDomain object, execute the tasks POST request, THEN 
